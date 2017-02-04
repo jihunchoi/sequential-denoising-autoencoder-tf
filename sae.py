@@ -24,7 +24,8 @@ def encode(cell, embeddings, inputs, inputs_length,
         (batch, cell.output_size) that contains sentence representations
     """
 
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.variable_scope(scope, initializer=tf.orthogonal_initializer(),
+                           reuse=reuse):
         # inputs_embed: (batch, max_len, word_dim)
         inputs_embed = tf.nn.embedding_lookup(params=embeddings, ids=inputs)
         sent_vec, _ = tf.nn.dynamic_rnn(
@@ -59,7 +60,8 @@ def decode_train(cell, embeddings, encoder_state, targets, targets_length,
         the cell's hidden state per time step
     """
 
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.variable_scope(scope, initializer=tf.orthogonal_initializer(),
+                           reuse=reuse):
         decoder_fn = seq2seq.simple_decoder_fn_train(
             encoder_state=encoder_state)
         targets_embed = tf.nn.embedding_lookup(params=embeddings, ids=targets)
@@ -130,7 +132,8 @@ def decode_inference(cell, embeddings, encoder_state, output_fn, vocab_size,
         tensor that contains IDs of generated words
     """
 
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.variable_scope(scope, initializer=tf.orthogonal_initializer(),
+                           reuse=reuse):
         decoder_fn = seq2seq.simple_decoder_fn_inference(
             output_fn=output_fn, encoder_state=encoder_state,
             embeddings=embeddings, start_of_sequence_id=bos_id,
