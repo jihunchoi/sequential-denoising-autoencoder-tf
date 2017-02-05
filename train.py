@@ -89,8 +89,8 @@ def main():
                 inputs=inputs, inputs_length=inputs_length, scope='encoder')
             decoder_outputs = sae.decode_train(
                 cell=rnn_cell, embeddings=embeddings,
-                encoder_state=encoder_state, targets=targets,
-                targets_length=targets_length, scope='decoder')
+                encoder_state=encoder_state, targets=targets[:, :-1],
+                targets_length=targets_length - 1, scope='decoder')
             generated = sae.decode_inference(
                 cell=rnn_cell, embeddings=embeddings,
                 encoder_state=encoder_state, output_fn=output_fn,
@@ -101,7 +101,8 @@ def main():
                 scope='decoder', reuse=True)
             loss = sae.loss(decoder_outputs=decoder_outputs,
                             output_fn=output_fn,
-                            targets=targets, targets_length=targets_length)
+                            targets=targets[:, 1:],
+                            targets_length=targets_length - 1)
 
             global_step = get_or_create_global_step()
             train_op = slim.optimize_loss(

@@ -28,10 +28,9 @@ def encode(cell, embeddings, inputs, inputs_length,
                            reuse=reuse):
         # inputs_embed: (batch, max_len, word_dim)
         inputs_embed = tf.nn.embedding_lookup(params=embeddings, ids=inputs)
-        sent_vec, _ = tf.nn.dynamic_rnn(
+        _, sent_vec = tf.nn.dynamic_rnn(
             cell=cell, inputs=inputs_embed, sequence_length=inputs_length,
             dtype=tf.float32, time_major=False, scope='rnn')
-        sent_vec = sent_vec[:, -1, :]
     return sent_vec
 
 
@@ -67,7 +66,7 @@ def decode_train(cell, embeddings, encoder_state, targets, targets_length,
         targets_embed = tf.nn.embedding_lookup(params=embeddings, ids=targets)
         decoder_outputs, _, _ = seq2seq.dynamic_rnn_decoder(
             cell=cell, decoder_fn=decoder_fn,
-            inputs=targets_embed[:, :-1, :], sequence_length=targets_length - 1,
+            inputs=targets_embed, sequence_length=targets_length,
             time_major=False, scope='rnn')
     return decoder_outputs
 
@@ -88,17 +87,14 @@ def loss(decoder_outputs, output_fn, targets, targets_length):
         cross-entropy loss value
     """
 
-    logits_flat = output_fn(decoder_outputs)
-    batch_size, max_length = decoder_outputs.get_shape().as_list()[:2]
-    if batch_size is None:
-        batch_size = tf.shape(decoder_outputs)[0]
-    if max_length is None:
-        max_length = tf.shape(decoder_outputs)[1]
-    logits = tf.reshape(logits_flat, shape=[batch_size, max_length, -1])
+    logits = output_fn(decoder_outputs)
+    max_len = logits.get_shape()[1].value
+    if max_len is None:
+        max_len = tf.shape(logits)[1]
     losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
-        labels=targets[:, 1:], logits=logits)
+        labels=targets, logits=logits)
     losses_mask = tf.sequence_mask(
-        lengths=targets_length - 1, maxlen=max_length,
+        lengths=targets_length, maxlen=max_len,
         dtype=tf.float32)
     return tf.reduce_sum(losses * losses_mask) / tf.reduce_sum(losses_mask)
 
