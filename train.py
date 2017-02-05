@@ -34,12 +34,14 @@ def main():
 
     # Check whether all needed options are given
     if config_path is not None:
-        assert not (word_dim or sentence_dim or omit_prob or swap_prob), (
+        assert (word_dim is None and sentence_dim is None
+                and omit_prob is None and swap_prob is None), (
             'Model hyperparameter options must not be provided when '
             'the "config" option is given.')
         config = ModelConfig.load(config_path)
     else:
-        assert word_dim and sentence_dim and omit_prob and swap_prob, (
+        assert not (word_dim is None or sentence_dim is None
+                    or omit_prob is None or swap_prob is None), (
             'All model hyperparameter options must be provided when '
             'the "config" option is not given.')
         config = ModelConfig(word_dim=word_dim, sentence_dim=sentence_dim,
