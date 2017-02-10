@@ -76,7 +76,7 @@ if __name__ == '__main__':
                         help='The path of a configuration INI file')
     parser.add_argument('--vocab', required=True,
                         help='The path of a vocabulary file')
-    parser.add_argument('--test-data', default=None,
+    parser.add_argument('--test-data', required=True,
                         help='The path of a test data file')
     parser.add_argument('--out', required=True,)
     parser.add_argument('--batch-size', default=32, type=int,
