@@ -20,3 +20,6 @@ sentence_N
 ```
 Also note that tokens must be separated by spaces.
 `python preprocess.py` does this chore.
+
+## Version
+Tested on TensorFlow v1.0.
